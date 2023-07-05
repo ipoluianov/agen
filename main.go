@@ -7,5 +7,5 @@ import (
 )
 
 func main() {
-	agen.ProcessDirectory("example")
+	agen.ProcessDirectory(".")
 }
