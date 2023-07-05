@@ -12,5 +12,7 @@ func main() {
 	err := agen.ProcessDirectory(".")
 	if err != nil {
 		fmt.Println("Error:", err)
+		return
 	}
+	fmt.Println("Complete")
 }
