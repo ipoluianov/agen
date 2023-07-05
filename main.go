@@ -2,10 +2,15 @@ package main
 
 import (
 	_ "embed"
+	"fmt"
 
 	"github.com/ipoluianov/agen/agen"
 )
 
 func main() {
-	agen.ProcessDirectory(".")
+	fmt.Println("Processing ...")
+	err := agen.ProcessDirectory(".")
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
 }

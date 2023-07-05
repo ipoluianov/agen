@@ -2,6 +2,7 @@ package agen
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -20,6 +21,8 @@ func ProcessDirectory(path string) (err error) {
 }
 
 func processDirectory(outDirectory string, path string, tmp string, depth int) (err error) {
+	fmt.Println("process directory:", path)
+
 	if depth > 10 {
 		return nil
 	}
@@ -36,7 +39,10 @@ func processDirectory(outDirectory string, path string, tmp string, depth int) (
 	for _, item := range items {
 		ext := filepath.Ext(item.Name())
 		if item.IsDir() {
-			processDirectory(outDirectory+"/"+item.Name(), path+"/"+item.Name(), tmp, depth+1)
+			err = processDirectory(outDirectory+"/"+item.Name(), path+"/"+item.Name(), tmp, depth+1)
+			if err != nil {
+				return
+			}
 		} else {
 			if ext != ".md" {
 				continue
@@ -44,6 +50,9 @@ func processDirectory(outDirectory string, path string, tmp string, depth int) (
 			shortName := strings.TrimSuffix(item.Name(), filepath.Ext(item.Name()))
 			outFile := outDirectory + "/" + shortName + ".html"
 			err = ProcessFile(tmp, outFile, path+"/"+shortName+".md")
+			if err != nil {
+				return
+			}
 		}
 	}
 
@@ -51,6 +60,7 @@ func processDirectory(outDirectory string, path string, tmp string, depth int) (
 }
 
 func ProcessFile(tmp string, outFile string, path string) error {
+	fmt.Println("process file:", path)
 	// Read the file
 	bs, err := os.ReadFile(path)
 	if err != nil {
@@ -66,6 +76,6 @@ func ProcessFile(tmp string, outFile string, path string) error {
 
 	// Apply Template
 	htmlFile := strings.ReplaceAll(tmp, "%CONTENT%", buf.String())
-	os.WriteFile(outFile, []byte(htmlFile), 0666)
-	return nil
+	err = os.WriteFile(outFile, []byte(htmlFile), 0666)
+	return err
 }
