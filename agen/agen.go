@@ -7,15 +7,34 @@ import (
 	"path/filepath"
 	"strings"
 
+	_ "embed"
+
 	"github.com/yuin/goldmark"
 )
+
+//go:embed "tmp.html"
+var tmpDefault []byte
 
 func ProcessDirectory(path string) (err error) {
 	srcDirectory := path + "/src"
 	outDirectory := path + "/out"
-	tmp, err := os.ReadFile(path + "/tmp.html")
+
+	err = os.MkdirAll(srcDirectory, 0777)
 	if err != nil {
 		return
+	}
+
+	tmp, err := os.ReadFile(path + "/tmp.html")
+	if err != nil {
+		fmt.Println("warning: template file is not found (tmp.html)")
+		tmp = tmpDefault
+		fmt.Println("warning: using default template file (tmp.html)")
+		err = os.WriteFile(path+"/tmp.html", tmpDefault, 0666)
+		if err != nil {
+			fmt.Println("warning: cannot write default template file (tmp.html):", err)
+		} else {
+			fmt.Println("warning: default template file (tmp.html) has been written")
+		}
 	}
 	return processDirectory(outDirectory, srcDirectory, string(tmp), 0)
 }
